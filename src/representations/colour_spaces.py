@@ -2,7 +2,7 @@ import math as base_math
 import torch
 import torch.nn as nn
 
-__all__ = [] # TODO Double bind functions and fill this out
+__all__ = []  # TODO Double bind functions and fill this out
 
 
 def fill_third(w):
