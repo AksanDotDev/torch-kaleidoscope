@@ -6,8 +6,8 @@ build-backend = "setuptools.build_meta"
 name = "torch-kaleidoscope"
 version = "0.0.1"
 dependencies = [
-    "pytorch>=2.0.0",
-    "torchvision>=0.15.0",
+    "torch>=2",
+    "torchvision>=0.15",
 ]
 description = "A tool kit for the use of non-RGB colour representations with torchvision and the PyTorch framework."
 readme = "README.md"
