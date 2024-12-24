@@ -36,6 +36,6 @@ class StainSeparationTransform(MultiplicationTransform):
         intm = torch.maximum(inpt, log_floor_reference)
         intm = torch.log(intm)
         intm = intm / torch.log(log_floor_reference)
-        intm = super()._transform(intm, dict())
+        intm = super()._transform(intm, params)
         intm = torch.maximum(intm, torch.tensor(0))
         return intm

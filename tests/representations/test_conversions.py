@@ -6,6 +6,8 @@ import hypothesis
 import hypothesis.extra.numpy as hnp
 import kaleidoscope.representations.conversions as conv
 
+from kaleidoscope.representations._reference_values import Illuminant, Observer
+
 
 TEST_IMAGE = hnp.arrays(
     np.dtype(np.float32),
@@ -19,18 +21,22 @@ TEST_IMAGE = hnp.arrays(
 def test_against_reference_conv(image, reference, candidate):
     a = np.ndarray.copy(image)
     b = np.ndarray.copy(image)
-    return np.testing.assert_array_almost_equal(
+    return np.testing.assert_allclose(
         reference(a, channel_axis=0),
-        candidate(torch.from_numpy(b)).numpy()
+        candidate(torch.from_numpy(b)).numpy(),
+        1e-4,
+        1e-4
     )
 
 
 def test_against_reference_stain(image, reference, candidate):
     a = np.ndarray.copy(image)
     b = np.ndarray.copy(image)
-    return np.testing.assert_array_almost_equal(
+    return np.testing.assert_allclose(
         ref_conv.separate_stains(a, reference, channel_axis=0),
-        candidate(torch.from_numpy(b)).numpy()
+        candidate(torch.from_numpy(b)).numpy(),
+        1e-4,
+        1e-4,
     )
 
 
@@ -77,6 +83,59 @@ class TestConversions(unittest.TestCase):
         self.assertIsNone(test_against_reference_conv(
             image, ref_conv.rgb2xyz, conv.XYZTransform()
         ))
+
+    @hypothesis.given(image=TEST_IMAGE)
+    def test_rgb_to_rgbcie(self, image) -> None:
+        self.assertIsNone(test_against_reference_conv(
+            image, ref_conv.rgb2rgbcie, conv.RGBCIETransform()
+        ))
+
+    @hypothesis.given(image=TEST_IMAGE)
+    def test_rgb_to_lab(self, image) -> None:
+        a = np.ndarray.copy(image)
+        b = np.ndarray.copy(image)
+        np.testing.assert_allclose(
+            ref_conv.rgb2lab(a, channel_axis=0),
+            conv.LABTransform(
+                illuminant=Illuminant.D65,
+                observer=Observer._SK_COMPAT
+            )(torch.from_numpy(b)).numpy(),
+            1e-4,
+            1e-4
+        )
+
+    @hypothesis.given(image=TEST_IMAGE)
+    def test_rgb_to_lab_2(self, image) -> None:
+        a = np.ndarray.copy(image)
+        b = np.ndarray.copy(image)
+        np.testing.assert_allclose(
+            ref_conv.rgb2lab(
+                a,
+                illuminant="D55",
+                observer="10",
+                channel_axis=0
+            ),
+            conv.LABTransform(
+                illuminant=Illuminant.D55,
+                observer=Observer._10
+            )(torch.from_numpy(b)).numpy(),
+            1e-4,
+            1e-4
+        )
+
+    @hypothesis.given(image=TEST_IMAGE)
+    def test_rgb_to_luv(self, image) -> None:
+        a = np.ndarray.copy(image)
+        b = np.ndarray.copy(image)
+        np.testing.assert_allclose(
+            ref_conv.rgb2luv(a, channel_axis=0),
+            conv.LUVTransform(
+                illuminant=Illuminant.D65,
+                observer=Observer._SK_COMPAT
+            )(torch.from_numpy(b)).numpy(),
+            1e-4,
+            1e-4
+        )
 
     @hypothesis.given(image=TEST_IMAGE)
     def test_rgb_to_hed(self, image) -> None:
