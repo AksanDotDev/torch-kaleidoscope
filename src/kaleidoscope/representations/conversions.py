@@ -30,7 +30,7 @@ class RGBTransform(ColourRepresentationTransform):
     _from = ColourRepresentation.RGB
     _to = ColourRepresentation.RGB
 
-    def _transform(self, inpt: Any, params: Dict[str, Any]) -> Any:
+    def transform(self, inpt: Any, params: Dict[str, Any]) -> Any:
         return inpt
 
 
@@ -39,7 +39,7 @@ class HSVTransform(ColourRepresentationTransform):
     _from = ColourRepresentation.RGB
     _to = ColourRepresentation.HSV
 
-    def _transform(self, inpt: Any, params: Dict[str, Any]) -> Any:
+    def transform(self, inpt: Any, params: Dict[str, Any]) -> Any:
         x_min, v = torch.aminmax(inpt, dim=0)
         c = v - x_min
         h = torch.where(
@@ -71,7 +71,7 @@ class H2SVTransform(HSVTransform):
     _from = ColourRepresentation.RGB
     _to = ColourRepresentation.H2SV
 
-    def _transform(self, inpt: Any, params: Dict[str, Any]) -> Any:
+    def transform(self, inpt: Any, params: Dict[str, Any]) -> Any:
         intm = super()._transform(inpt)
         # Scale back to the range 0-2pi and then take the sin and cos
         h_sin = torch.sin(intm[0] * (2 * base_math.pi))
@@ -84,7 +84,7 @@ class H3SVTransform(HSVTransform):
     _from = ColourRepresentation.RGB
     _to = ColourRepresentation.H3SV
 
-    def _transform(self, inpt: Any, params: Dict[str, Any]) -> Any:
+    def transform(self, inpt: Any, params: Dict[str, Any]) -> Any:
         intm = super()._transform(inpt)
         # Scale back to the range 0-2pi and then take the sin and cos
         h_sin = torch.sin(intm[0] * (2 * base_math.pi)) * intm[1]
@@ -112,8 +112,8 @@ class YCbCrTransform(MultiplicationTransform):
     _to = ColourRepresentation.YCBCR
     _transform_matrix = rgb_to_x_tensors[ColourRepresentation.YCBCR]
 
-    def _transform(self, inpt: Any, params: Dict[str, Any]) -> Any:
-        intm = super()._transform(inpt, params)
+    def transform(self, inpt: Any, params: Dict[str, Any]) -> Any:
+        intm = super().transform(inpt, params)
         intm[0, :, :] += 16.0
         intm[1, :, :] += 128.0
         intm[2, :, :] += 128.0
@@ -140,13 +140,13 @@ class XYZTransform(MultiplicationTransform):
     _to = ColourRepresentation.XYZ
     _transform_matrix = rgb_to_x_tensors[ColourRepresentation.XYZ]
 
-    def _transform(self, inpt: Any, params: Dict[str, Any]) -> Any:
+    def transform(self, inpt: Any, params: Dict[str, Any]) -> Any:
         intm = torch.where(
             inpt > 0.04045,
             torch.pow((inpt + 0.055) / 1.055, 2.4),
             inpt / 12.92
         )
-        intm = super()._transform(intm, params)
+        intm = super().transform(intm, params)
         return intm
 
 
@@ -167,8 +167,8 @@ class LABTransform(XYZTransform):
         self.illuminant = illuminant
         self.observer = observer
 
-    def _transform(self, inpt: Any, params: Dict[str, Any]) -> Any:
-        intm = super()._transform(inpt, params)
+    def transform(self, inpt: Any, params: Dict[str, Any]) -> Any:
+        intm = super().transform(inpt, params)
         ref_white = reference_white_tensors[self.illuminant][self.observer]
         for i in range(3):
             intm[i, :, :] = intm[i, :, :]/ref_white[i]
@@ -197,8 +197,8 @@ class LUVTransform(XYZTransform):
         self.illuminant = illuminant
         self.observer = observer
 
-    def _transform(self, inpt: Any, params: Dict[str, Any]) -> Any:
-        intm = super()._transform(inpt, params)
+    def transform(self, inpt: Any, params: Dict[str, Any]) -> Any:
+        intm = super().transform(inpt, params)
         ref_white = reference_white_tensors[self.illuminant][self.observer]
         u0, v0 = reference_uv_tensors[self.illuminant][self.observer]
         L = intm[1, :, :] / ref_white[1]

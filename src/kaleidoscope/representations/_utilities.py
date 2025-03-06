@@ -23,7 +23,7 @@ class MultiplicationTransform(ColourRepresentationTransform):
     # Use this to define the multiplication matrix for the final result
     _transform_matrix = NotImplementedField
 
-    def _transform(self, inpt: Any, params: Dict[str, Any]) -> Any:
+    def transform(self, inpt: Any, params: Dict[str, Any]) -> Any:
         intm = torch.permute(inpt, (1, 2, 0))
         intm = torch.matmul(intm, self._transform_matrix)
         return torch.permute(intm, (2, 0, 1))
@@ -32,10 +32,10 @@ class MultiplicationTransform(ColourRepresentationTransform):
 class StainSeparationTransform(MultiplicationTransform):
     _transform_matrix = NotImplementedField
 
-    def _transform(self, inpt: Any, params: Dict[str, Any]) -> Any:
+    def transform(self, inpt: Any, params: Dict[str, Any]) -> Any:
         intm = torch.maximum(inpt, log_floor_reference)
         intm = torch.log(intm)
         intm = intm / torch.log(log_floor_reference)
-        intm = super()._transform(intm, params)
+        intm = super().transform(intm, params)
         intm = torch.maximum(intm, torch.tensor(0))
         return intm
