@@ -72,7 +72,7 @@ class H2SVTransform(HSVTransform):
     _to = ColourRepresentation.H2SV
 
     def transform(self, inpt: Any, params: Dict[str, Any]) -> Any:
-        intm = super()._transform(inpt)
+        intm = super().transform(inpt)
         # Scale back to the range 0-2pi and then take the sin and cos
         h_sin = torch.sin(intm[0] * (2 * base_math.pi))
         h_cos = torch.cos(intm[0] * (2 * base_math.pi))
