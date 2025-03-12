@@ -1,0 +1,4 @@
+torch>=2.6
+torchvision>=0.21
+scikit-image>=0.25
+hypothesis>=6.128.2
