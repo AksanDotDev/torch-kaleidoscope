@@ -1,13 +1,6 @@
 import torch.nn as nn
 import torchvision.models as models
 
-__all__ = [
-    "mutate_model",
-    "mutate_backbone",
-    "mutate_Conv2d",
-    "mutate_Conv3d",
-]
-
 
 def mutate_Conv2d(conv: nn.Conv2d, channels: int = 3):
     if conv.in_channels == channels:
@@ -54,7 +47,19 @@ def mutate_backbone(backbone, channels: int = 3):
     return backbone
 
 
-def mutate_model(model, channels: int = 3):
+def mutate_model(model: nn.Module, channels: int = 3) -> nn.Module:
+    """Modify and return a model in place to alter the number of input colour channels it takes.
+
+    Args:
+        model (torch.nn.Module): A torchvision model to be modified.
+        channels (int, optional): The number of input channels desired. Defaults to 3.
+
+    Raises:
+        TypeError: _description_
+
+    Returns:
+        torch.nn.Module: The original model after modification.
+    """
     # Classification Block
     if isinstance(model, models.AlexNet)\
             or isinstance(model, models.DenseNet)\

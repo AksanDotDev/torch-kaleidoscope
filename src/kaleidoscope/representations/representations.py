@@ -3,6 +3,7 @@ from enum import Enum
 from typing import TypeVar, Callable, NamedTuple
 
 from ._utilities import ColourRepresentationTransform
+from ..metrics._reference_values import IMAGENET_METRICS, NormalisationParameters
 
 
 class TransformKey(NamedTuple):
@@ -17,6 +18,17 @@ class RepresentationDataMixin:
 
 
 class ColourRepresentation(RepresentationDataMixin, Enum):
+    """The base enumeration of colour representation availabel in the package.
+
+    Attributes:
+        has_conversion_from_rgb: A boolean indicating if a conversion from RGB
+        exists for this representation.
+        conversion_from_rgb: A function that can be used to convert any image
+        tensor from RGB to this representation.
+        imagenet_metrics: A named tuple containing the metrics required for
+        normalisation based on the ImageNet1k dataset.
+    """
+
     GRAYSCALE = "Grayscale", 1
     RGB = "RGB", 3
     XYZ = "CIE XYZ", 3
@@ -54,6 +66,14 @@ class ColourRepresentation(RepresentationDataMixin, Enum):
     @property
     def conversion_from_rgb(self) -> ColourRepresentationTransform:
         return get_rgb_conversion_to(self)
+
+    @property
+    def normalisation_metrics(self) -> NormalisationParameters:
+        return self.imagenet_metrics
+
+    @property
+    def imagenet_metrics(self) -> NormalisationParameters:
+        return IMAGENET_METRICS[self.name]
 
     def __hash__(self) -> int:
         return hash(self.strict_name)
